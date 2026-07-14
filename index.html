@@ -2,12 +2,48 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>astropinax</title>
+    <title>AstroPinax — APOD</title>
+    <link rel="stylesheet" href="/src/theme.css" />
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <header class="topbar">
+        <h1 class="logo">Astro<span class="logo-accent">Pinax</span></h1>
+        <nav class="nav-controls">
+          <button class="btn btn-ghost" id="btn-prev" title="Previous day">&larr;</button>
+          <input type="date" id="datepicker" />
+          <button class="btn btn-ghost" id="btn-next" title="Next day">&rarr;</button>
+          <button class="btn btn-primary" id="btn-today">Today</button>
+        </nav>
+      </header>
+
+      <main id="content">
+        <div id="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Fetching the cosmos…</p>
+        </div>
+
+        <div id="error" class="error-state hidden">
+          <p id="error-message"></p>
+          <button class="btn btn-primary" id="btn-retry">Try again</button>
+        </div>
+
+        <div id="apod-view" class="apod-view hidden">
+          <div class="image-container">
+            <img id="apod-image" src="" alt="" />
+            <iframe id="apod-video" class="hidden" src="" allowfullscreen></iframe>
+            <div class="date-badge" id="date-badge"></div>
+          </div>
+
+          <div class="details">
+            <h2 class="title" id="apod-title"></h2>
+            <p class="explanation" id="apod-explanation"></p>
+          </div>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
