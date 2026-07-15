@@ -5,8 +5,12 @@ const APOD_START = new Date('1995-06-16');
 const TODAY = new Date();
 
 const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
 
+// DOM Elements
 const datepicker = $('#datepicker');
+const btnCalendar = $('#btn-calendar');
+const btnTheme = $('#btn-theme');
 const apodView = $('#apod-view');
 const loading = $('#loading');
 const errorEl = $('#error');
@@ -15,12 +19,92 @@ const apodImage = $('#apod-image');
 const apodVideo = $('#apod-video');
 const apodTitle = $('#apod-title');
 const apodExplanation = $('#apod-explanation');
-const dateBadge = $('#date-badge');
+const apodDateLabel = $('#apod-date-label');
+const dateDisplay = $('#date-display');
 const btnPrev = $('#btn-prev');
 const btnNext = $('#btn-next');
 const btnToday = $('#btn-today');
 const btnRetry = $('#btn-retry');
+const searchForm = $('#search-form');
+const searchInput = $('#search-input');
+const starfield = $('#starfield');
 
+// Theme Management
+const THEME_KEY = 'astropinax-theme';
+
+function getPreferredTheme() {
+  return localStorage.getItem(THEME_KEY) || 'cream';
+}
+
+function setTheme(name) {
+  document.documentElement.setAttribute('data-theme', name);
+  localStorage.setItem(THEME_KEY, name);
+}
+
+btnTheme.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') || 'cream';
+  const next = current === 'space' ? 'cream' : 'space';
+  setTheme(next);
+  starfield.style.opacity = next === 'space' ? '1' : '0';
+});
+
+// Initialize Theme
+setTheme(getPreferredTheme());
+starfield.style.opacity = getPreferredTheme() === 'space' ? '1' : '0';
+
+// Starfield Canvas Background Animation
+let stars = [];
+let starAnimId = null;
+
+function initStarfield() {
+  const ctx = starfield.getContext('2d');
+  if (!ctx) return;
+
+  function resize() {
+    starfield.width = window.innerWidth;
+    starfield.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM_STARS = 250;
+  stars = [];
+
+  for (let i = 0; i < NUM_STARS; i++) {
+    stars.push({
+      x: Math.random() * starfield.width,
+      y: Math.random() * starfield.height,
+      r: Math.random() * 1.8 + 0.3,
+      base: Math.random() * 0.5 + 0.3,
+      speed: Math.random() * 0.02 + 0.005,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+
+  let time = 0;
+
+  function draw() {
+    ctx.clearRect(0, 0, starfield.width, starfield.height);
+    time++;
+
+    for (const s of stars) {
+      const alpha = s.base + Math.sin(time * s.speed + s.phase) * 0.2;
+      const a = Math.max(0.1, Math.min(1, alpha));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(220, 230, 255, ${a})`;
+      ctx.fill();
+    }
+
+    starAnimId = requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+initStarfield();
+
+// Date Utility Helpers
 function formatDate(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -39,23 +123,35 @@ function clampDate(date) {
   return date;
 }
 
+function formatDisplay(d) {
+  return d.toLocaleDateString('en-US', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+  });
+}
+
+function formatShort(d) {
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+}
+
+// UI State Management
 function showState(show) {
   loading.classList.toggle('hidden', show !== 'loading');
   errorEl.classList.toggle('hidden', show !== 'error');
   apodView.classList.toggle('hidden', show !== 'apod');
 }
 
-function updateDateBadge(dateStr) {
+function updateDateUI(dateStr) {
   const d = toDateObj(dateStr);
-  dateBadge.textContent = d.toLocaleDateString('en-US', {
-    weekday: 'short', year: 'numeric', month: 'long', day: 'numeric'
-  });
+  dateDisplay.textContent = formatDisplay(d);
+  apodDateLabel.textContent = formatShort(d);
 }
 
 function updateUI(data) {
   apodTitle.textContent = data.title;
   apodExplanation.textContent = data.explanation;
-  updateDateBadge(data.date);
+  updateDateUI(data.date);
 
   if (data.media_type === 'video') {
     apodImage.classList.add('hidden');
@@ -71,6 +167,7 @@ function updateUI(data) {
   showState('apod');
 }
 
+// API Integration
 async function fetchAPOD(dateStr) {
   showState('loading');
 
@@ -89,31 +186,52 @@ async function fetchAPOD(dateStr) {
   }
 }
 
+// Navigation Controls
 function goToDate(dateStr) {
   datepicker.value = dateStr;
   fetchAPOD(dateStr);
 }
 
 function goToday() {
-  const str = formatDate(TODAY);
-  goToDate(str);
+  goToDate(formatDate(TODAY));
 }
 
 function shiftDay(delta) {
   const current = datepicker.value ? toDateObj(datepicker.value) : new Date(TODAY);
   current.setDate(current.getDate() + delta);
-  const clamped = clampDate(current);
-  goToDate(formatDate(clamped));
+  goToDate(formatDate(clampDate(current)));
 }
 
-/* ─── Init ─── */
+// Search Redirect
+searchForm.addEventListener('submit', (e) => {
+  const q = searchInput.value.trim();
+  if (!q) {
+    e.preventDefault();
+    return;
+  }
+  if (q.includes('.') && !q.includes(' ')) {
+    e.preventDefault();
+    window.open(`https://${q}`, '_blank');
+  }
+});
 
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const q = searchInput.value.trim();
+    if (q.includes('.') && !q.includes(' ')) {
+      e.preventDefault();
+      window.open(`https://${q}`, '_blank');
+    }
+  }
+});
+
+// Initialization
 datepicker.max = formatDate(TODAY);
 datepicker.min = formatDate(APOD_START);
-
 goToday();
 
-/* ─── Events ─── */
+// UI Event Listeners
+btnCalendar.addEventListener('click', () => datepicker.showPicker?.() ?? datepicker.click());
 
 datepicker.addEventListener('change', () => {
   if (datepicker.value) fetchAPOD(datepicker.value);
@@ -126,8 +244,7 @@ btnRetry.addEventListener('click', () => {
   if (datepicker.value) fetchAPOD(datepicker.value);
 });
 
-/* ─── Keyboard ─── */
-
+// Keyboard Navigation
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
   if (e.key === 'ArrowLeft') shiftDay(-1);
