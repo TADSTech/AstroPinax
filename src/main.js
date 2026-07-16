@@ -5,26 +5,21 @@ const APOD_START = new Date('1995-06-16');
 const TODAY = new Date();
 
 const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
 
 // DOM Elements
 const datepicker = $('#datepicker');
 const btnCalendar = $('#btn-calendar');
 const btnTheme = $('#btn-theme');
 const apodView = $('#apod-view');
-const loading = $('#loading');
-const errorEl = $('#error');
-const errorMsg = $('#error-message');
 const apodImage = $('#apod-image');
 const apodVideo = $('#apod-video');
 const apodTitle = $('#apod-title');
 const apodExplanation = $('#apod-explanation');
 const apodDateLabel = $('#apod-date-label');
+const apodBadge = $('#apod-badge');
 const dateDisplay = $('#date-display');
-const btnPrev = $('#btn-prev');
-const btnNext = $('#btn-next');
-const btnToday = $('#btn-today');
 const btnRetry = $('#btn-retry');
+const errorMsg = $('#error-message');
 const searchForm = $('#search-form');
 const searchInput = $('#search-input');
 const starfield = $('#starfield');
@@ -33,24 +28,27 @@ const starfield = $('#starfield');
 const THEME_KEY = 'astropinax-theme';
 
 function getPreferredTheme() {
-  return localStorage.getItem(THEME_KEY) || 'cream';
+  return localStorage.getItem(THEME_KEY) || 'space';
 }
 
 function setTheme(name) {
   document.documentElement.setAttribute('data-theme', name);
   localStorage.setItem(THEME_KEY, name);
+  
+  // Starfield logic: Faint in void mode to blend in
+  if (starfield) {
+    starfield.style.opacity = name === 'void' ? '0.15' : '1';
+  }
 }
 
 btnTheme.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme') || 'cream';
-  const next = current === 'space' ? 'cream' : 'space';
+  const current = document.documentElement.getAttribute('data-theme') || 'space';
+  const next = current === 'void' ? 'space' : 'void';
   setTheme(next);
-  starfield.style.opacity = next === 'space' ? '1' : '0';
 });
 
 // Initialize Theme
 setTheme(getPreferredTheme());
-starfield.style.opacity = getPreferredTheme() === 'space' ? '1' : '0';
 
 // Starfield Canvas Background Animation
 let stars = [];
@@ -136,10 +134,24 @@ function formatShort(d) {
 }
 
 // UI State Management
-function showState(show) {
-  loading.classList.toggle('hidden', show !== 'loading');
-  errorEl.classList.toggle('hidden', show !== 'error');
-  apodView.classList.toggle('hidden', show !== 'apod');
+function showLoading() {
+  apodView.classList.remove('hidden');
+  apodView.classList.add('loading');
+  errorMsg.classList.add('hidden');
+  btnRetry.classList.add('hidden');
+  apodBadge.classList.add('hidden');
+  
+  // Clear contents for skeleton effect
+  apodTitle.textContent = '';
+  apodExplanation.textContent = '';
+  apodDateLabel.textContent = '';
+}
+
+function showError(msg) {
+  apodView.classList.remove('loading');
+  errorMsg.textContent = msg;
+  errorMsg.classList.remove('hidden');
+  btnRetry.classList.remove('hidden');
 }
 
 function updateDateUI(dateStr) {
@@ -149,6 +161,11 @@ function updateDateUI(dateStr) {
 }
 
 function updateUI(data) {
+  apodView.classList.remove('loading');
+  errorMsg.classList.add('hidden');
+  btnRetry.classList.add('hidden');
+  apodBadge.classList.remove('hidden');
+
   apodTitle.textContent = data.title;
   apodExplanation.textContent = data.explanation;
   updateDateUI(data.date);
@@ -163,13 +180,14 @@ function updateUI(data) {
     apodImage.src = data.url;
     apodImage.alt = data.title;
   }
-
-  showState('apod');
+  
+  // Auto-focus search input after state updates
+  setTimeout(() => searchInput.focus(), 100);
 }
 
 // API Integration
 async function fetchAPOD(dateStr) {
-  showState('loading');
+  showLoading();
 
   try {
     const res = await fetch(`${API_BASE}?api_key=${API_KEY}&date=${dateStr}`);
@@ -181,8 +199,7 @@ async function fetchAPOD(dateStr) {
     const data = await res.json();
     updateUI(data);
   } catch (err) {
-    errorMsg.textContent = err.message;
-    showState('error');
+    showError(err.message);
   }
 }
 
@@ -215,16 +232,6 @@ searchForm.addEventListener('submit', (e) => {
   }
 });
 
-searchInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    const q = searchInput.value.trim();
-    if (q.includes('.') && !q.includes(' ')) {
-      e.preventDefault();
-      window.open(`https://${q}`, '_blank');
-    }
-  }
-});
-
 // Initialization
 datepicker.max = formatDate(TODAY);
 datepicker.min = formatDate(APOD_START);
@@ -237,9 +244,6 @@ datepicker.addEventListener('change', () => {
   if (datepicker.value) fetchAPOD(datepicker.value);
 });
 
-btnPrev.addEventListener('click', () => shiftDay(-1));
-btnNext.addEventListener('click', () => shiftDay(1));
-btnToday.addEventListener('click', goToday);
 btnRetry.addEventListener('click', () => {
   if (datepicker.value) fetchAPOD(datepicker.value);
 });
@@ -250,4 +254,10 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') shiftDay(-1);
   if (e.key === 'ArrowRight') shiftDay(1);
   if (e.key === 't' || e.key === 'T') goToday();
+});
+
+// Initial focus
+window.addEventListener('load', () => {
+  apodView.classList.remove('hidden');
+  searchInput.focus();
 });

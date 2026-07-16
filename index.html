@@ -16,9 +16,11 @@
           <h1 class="logo">Astro<span class="logo-accent">Pinax</span></h1>
         </div>
         <div class="topbar-right">
-          <button class="btn-icon" id="btn-theme" title="Toggle theme">
-            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <button class="btn-icon" id="btn-theme" title="Toggle theme (Space/Void)">
+            <!-- Space icon (Sparkles/Stars) -->
+            <svg class="icon-space" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M18.36 5.64l-12.72 12.72M5.64 5.64l12.72 12.72"/></svg>
+            <!-- Void icon (Moon/Dark) -->
+            <svg class="icon-void" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
           <button class="btn-icon" id="btn-calendar" title="Pick a date">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -29,42 +31,40 @@
       </header>
 
       <main id="content">
-        <section class="search-section">
-          <form id="search-form" action="https://www.google.com/search" method="GET" target="_blank">
-            <div class="search-wrapper">
-              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" name="q" id="search-input" placeholder="Search Google or type a URL…" autocomplete="off" spellcheck="false" autofocus />
-            </div>
-          </form>
-        </section>
-
         <section class="apod-section" id="apod-section">
-          <div id="loading" class="loading-state">
-            <div class="spinner"></div>
-            <p>Fetching the cosmos…</p>
-          </div>
-
-          <div id="error" class="error-state hidden">
-            <p id="error-message"></p>
-            <button class="btn btn-primary btn-sm" id="btn-retry">Try again</button>
-          </div>
-
-          <div id="apod-view" class="apod-view hidden">
-            <div class="apod-media">
+          <!-- We removed the old global loading/error states. 
+               The view is always present, but elements have skeleton classes while loading. -->
+          <div id="apod-view" class="apod-view loading">
+            <!-- Background Layer -->
+            <div class="apod-media" id="apod-media-container">
               <img id="apod-image" src="" alt="" />
               <iframe id="apod-video" class="hidden" src="" allowfullscreen></iframe>
             </div>
-            <div class="apod-info">
-              <div class="apod-meta">
-                <span class="apod-date" id="apod-date-label"></span>
-                <span class="apod-badge">APOD</span>
-              </div>
-              <h2 class="apod-title" id="apod-title"></h2>
-              <p class="apod-explanation" id="apod-explanation"></p>
-              <div class="apod-nav">
-                <button class="btn btn-ghost btn-sm" id="btn-prev" title="Previous day">&larr; Prev</button>
-                <button class="btn btn-primary btn-sm" id="btn-today">Today</button>
-                <button class="btn btn-ghost btn-sm" id="btn-next" title="Next day">Next &rarr;</button>
+
+            <!-- Dark overlay for legibility (and Void mode darkening) -->
+            <div class="dark-overlay"></div>
+
+            <!-- Foreground Layer (Search + Text) -->
+            <div class="foreground-ui">
+              <section class="search-section">
+                <form id="search-form" action="https://www.google.com/search" method="GET" target="_blank">
+                  <div class="search-wrapper">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" name="q" id="search-input" placeholder="Search the cosmos or type a URL…" autocomplete="off" spellcheck="false" autofocus />
+                  </div>
+                </form>
+              </section>
+
+              <!-- This info panel takes skeleton animations while .loading is active on #apod-view -->
+              <div class="apod-info" id="apod-info-container">
+                <div class="apod-meta">
+                  <span class="apod-date" id="apod-date-label"></span>
+                  <span class="apod-badge hidden" id="apod-badge">APOD</span>
+                </div>
+                <h2 class="apod-title" id="apod-title"></h2>
+                <div class="apod-explanation" id="apod-explanation"></div>
+                <p id="error-message" class="error-message hidden"></p>
+                <button class="btn btn-primary btn-sm hidden" id="btn-retry">Try again</button>
               </div>
             </div>
           </div>

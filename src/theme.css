@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after {
   margin: 0;
@@ -6,42 +6,19 @@
   box-sizing: border-box;
 }
 
+/* Default Theme: Space (Deep Navy) */
 :root,
-[data-theme="cream"] {
-  --bg-primary: #F4F3EE;
-  --bg-surface: #E5E0D8;
-  --bg-raised: #D9D4CC;
-  --bg-overlay: rgba(244, 243, 238, 0.85);
-
-  --japonica: #D97757;
-  --peach: #DE7356;
-  --crail: #C15F3C;
-  --pampas: #F4F3EE;
-
-  --green-500: #9AFD08;
-  --green-glow: rgba(154, 253, 8, 0.25);
-
-  --text-primary: #1A1A2E;
-  --text-secondary: #4A4A5E;
-  --text-muted: #7A7A8E;
-
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.15);
-
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --max-width: 960px;
-}
-
 [data-theme="space"] {
   --bg-primary: #0A0A1A;
   --bg-surface: #12122A;
   --bg-raised: #1E1E3A;
   --bg-overlay: rgba(10, 10, 26, 0.85);
+
+  --japonica: #D97757;
+  --peach: #DE7356;
+  --crail: #C15F3C;
+  --green-500: #9AFD08;
+  --green-glow: rgba(154, 253, 8, 0.25);
 
   --text-primary: #E5E7EB;
   --text-secondary: #9CA3AF;
@@ -49,4 +26,27 @@
 
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-hover: rgba(255, 255, 255, 0.12);
+
+  --font-heading: 'Rajdhani', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --max-width: 100vw;
+}
+
+/* Void Theme: True Deep Black */
+[data-theme="void"] {
+  --bg-primary: #000000;
+  --bg-surface: #050505;
+  --bg-raised: #111111;
+  --bg-overlay: rgba(0, 0, 0, 0.95);
+
+  --text-primary: #D1D5DB;
+  --text-secondary: #858C96;
+  --text-muted: #4B5563;
+
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-hover: rgba(255, 255, 255, 0.08);
 }
