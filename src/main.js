@@ -8,7 +8,7 @@ const $ = (sel) => document.querySelector(sel);
 
 // DOM Elements
 const datepicker = $('#datepicker');
-const btnCalendar = $('#btn-calendar');
+const dateWidgetBtn = $('#date-widget-btn');
 const btnTheme = $('#btn-theme');
 const apodView = $('#apod-view');
 const apodImage = $('#apod-image');
@@ -22,6 +22,8 @@ const btnRetry = $('#btn-retry');
 const errorMsg = $('#error-message');
 const searchForm = $('#search-form');
 const searchInput = $('#search-input');
+const searchWrapper = $('#search-wrapper');
+const suggestionsBox = $('#suggestions-box');
 const starfield = $('#starfield');
 
 // Theme Management
@@ -35,19 +37,18 @@ function setTheme(name) {
   document.documentElement.setAttribute('data-theme', name);
   localStorage.setItem(THEME_KEY, name);
   
-  // Starfield logic: Faint in void mode to blend in
   if (starfield) {
     starfield.style.opacity = name === 'void' ? '0.15' : '1';
   }
 }
 
-btnTheme.addEventListener('click', () => {
+function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'space';
   const next = current === 'void' ? 'space' : 'void';
   setTheme(next);
-});
+}
 
-// Initialize Theme
+btnTheme.addEventListener('click', toggleTheme);
 setTheme(getPreferredTheme());
 
 // Starfield Canvas Background Animation
@@ -141,7 +142,6 @@ function showLoading() {
   btnRetry.classList.add('hidden');
   apodBadge.classList.add('hidden');
   
-  // Clear contents for skeleton effect
   apodTitle.textContent = '';
   apodExplanation.textContent = '';
   apodDateLabel.textContent = '';
@@ -160,7 +160,10 @@ function updateDateUI(dateStr) {
   apodDateLabel.textContent = formatShort(d);
 }
 
+let activeApodData = null;
+
 function updateUI(data) {
+  activeApodData = data;
   apodView.classList.remove('loading');
   errorMsg.classList.add('hidden');
   btnRetry.classList.add('hidden');
@@ -181,8 +184,7 @@ function updateUI(data) {
     apodImage.alt = data.title;
   }
   
-  // Auto-focus search input after state updates
-  setTimeout(() => searchInput.focus(), 100);
+  setTimeout(forceFocus, 100);
 }
 
 // API Integration
@@ -213,24 +215,243 @@ function goToday() {
   goToDate(formatDate(TODAY));
 }
 
+function goRandom() {
+  const start = APOD_START.getTime();
+  const end = TODAY.getTime();
+  const randomTime = start + Math.random() * (end - start);
+  const randomDate = new Date(randomTime);
+  goToDate(formatDate(randomDate));
+}
+
 function shiftDay(delta) {
   const current = datepicker.value ? toDateObj(datepicker.value) : new Date(TODAY);
   current.setDate(current.getDate() + delta);
   goToDate(formatDate(clampDate(current)));
 }
 
-// Search Redirect
+// Custom UI: Command Terminal Help Mode
+function showHelpGuide() {
+  apodTitle.textContent = "AstroPinax Terminal System Guide";
+  apodDateLabel.textContent = "COMMAND DIRECTORY";
+  
+  apodExplanation.innerHTML = `
+    <div style="font-family: monospace; line-height: 1.6; color: var(--text-secondary);">
+      <p style="margin-bottom: 12px; color: var(--green-500);">=== UTILITY COMMANDS (Type &gt; to activate) ===</p>
+      <div style="margin-bottom: 8px;"><strong>&gt;today</strong> - Jump to today's cosmic image</div>
+      <div style="margin-bottom: 8px;"><strong>&gt;random</strong> - View a random cosmic date since 1995</div>
+      <div style="margin-bottom: 8px;"><strong>&gt;theme</strong> - Toggle between Space and Void layout</div>
+      <div style="margin-bottom: 8px;"><strong>&gt;nasa</strong> - Open official NASA Astronomy Pic portal</div>
+      <div style="margin-bottom: 8px;"><strong>&gt;source</strong> - Visit the open-source project repository</div>
+      <div style="margin-bottom: 16px;"><strong>&gt;help</strong> - Reload this interface guide</div>
+      
+      <p style="margin-bottom: 12px; color: #00D2FF;">=== TARGETED SECTOR SEARCHES (Type / to activate) ===</p>
+      <div style="margin-bottom: 8px;"><strong>/github &lt;query&gt;</strong> - Search GitHub repositories</div>
+      <div style="margin-bottom: 8px;"><strong>/reddit &lt;query&gt;</strong> - Search Reddit posts & communities</div>
+      <div style="margin-bottom: 8px;"><strong>/ddg &lt;query&gt;</strong> - Search DuckDuckGo search engine</div>
+      <div style="margin-bottom: 8px;"><strong>/youtube &lt;query&gt;</strong> - Search YouTube videos</div>
+      <div style="margin-bottom: 12px;"><strong>/wikipedia &lt;query&gt;</strong> - Search Wikipedia encyclopedia</div>
+      
+      <button id="btn-close-help" class="btn btn-primary btn-sm" style="margin-top: 10px;">Return to APOD Info</button>
+    </div>
+  `;
+
+  $('#btn-close-help').addEventListener('click', () => {
+    if (activeApodData) {
+      updateUI(activeApodData);
+    } else {
+      goToday();
+    }
+  });
+}
+
+// Commands Directory (">" operator)
+const UTILITY_COMMANDS = [
+  { cmd: '>today', desc: 'Jump to today\'s astronomy picture', action: () => goToday() },
+  { cmd: '>random', desc: 'Explore a random date from the archives', action: () => goRandom() },
+  { cmd: '>theme', desc: 'Toggle Space and Void theme modes', action: () => toggleTheme() },
+  { cmd: '>nasa', desc: 'Open the official NASA APOD site', action: () => { window.location.href = 'https://apod.nasa.gov/apod/astropix.html'; } },
+  { cmd: '>source', desc: 'View source code on GitHub', action: () => { window.location.href = 'https://github.com/TADSTech/AstroPinax'; } },
+  { cmd: '>help', desc: 'Display all terminal commands', action: () => showHelpGuide() }
+];
+
+// Targeted Search Operators ("/" operator)
+const SEARCH_ENGINES = [
+  { cmd: '/github', placeholder: '/github ', desc: 'Search GitHub', url: 'https://github.com/search?q={q}' },
+  { cmd: '/reddit', placeholder: '/reddit ', desc: 'Search Reddit', url: 'https://www.reddit.com/search/?q={q}' },
+  { cmd: '/ddg', placeholder: '/ddg ', desc: 'Search DuckDuckGo', url: 'https://duckduckgo.com/?q={q}' },
+  { cmd: '/youtube', placeholder: '/youtube ', desc: 'Search YouTube', url: 'https://www.youtube.com/results?search_query={q}' },
+  { cmd: '/wikipedia', placeholder: '/wikipedia ', desc: 'Search Wikipedia', url: 'https://en.wikipedia.org/wiki/Special:Search?search={q}' }
+];
+
+let activeSuggestionIdx = -1;
+let filteredItems = [];
+let mode = null; // 'command' or 'slash'
+
+function hideSuggestions() {
+  suggestionsBox.classList.add('hidden');
+  suggestionsBox.innerHTML = '';
+  activeSuggestionIdx = -1;
+  filteredItems = [];
+  mode = null;
+}
+
+function showSuggestions(inputVal) {
+  const query = inputVal.toLowerCase().split(' ')[0]; // only search prefix
+  
+  if (inputVal.startsWith('>')) {
+    mode = 'command';
+    filteredItems = UTILITY_COMMANDS.filter(c => c.cmd.startsWith(query));
+  } else if (inputVal.startsWith('/')) {
+    mode = 'slash';
+    filteredItems = SEARCH_ENGINES.filter(c => c.cmd.startsWith(query));
+  }
+
+  if (filteredItems.length === 0) {
+    hideSuggestions();
+    return;
+  }
+
+  suggestionsBox.innerHTML = '';
+  filteredItems.forEach((c, idx) => {
+    const div = document.createElement('div');
+    div.className = 'suggestion-item' + (idx === activeSuggestionIdx ? ' active' : '');
+    
+    const cmdClass = mode === 'slash' ? 'suggestion-command slash' : 'suggestion-command';
+    div.innerHTML = `<span class="${cmdClass}">${c.cmd}</span><span class="suggestion-desc">${c.desc}</span>`;
+    
+    div.addEventListener('click', () => {
+      executeItem(c);
+    });
+    
+    suggestionsBox.appendChild(div);
+  });
+  suggestionsBox.classList.remove('hidden');
+}
+
+function updateSuggestionHighlight() {
+  const items = suggestionsBox.querySelectorAll('.suggestion-item');
+  items.forEach((item, idx) => {
+    item.classList.toggle('active', idx === activeSuggestionIdx);
+  });
+}
+
+function executeItem(itemObj) {
+  if (mode === 'command') {
+    searchInput.value = '';
+    searchWrapper.classList.remove('command-active');
+    hideSuggestions();
+    itemObj.action();
+  } else if (mode === 'slash') {
+    // Fill the input with the engine placeholder so they can complete query
+    searchInput.value = itemObj.placeholder;
+    searchWrapper.classList.remove('command-active');
+    searchWrapper.classList.add('slash-active');
+    hideSuggestions();
+    searchInput.focus();
+  }
+}
+
+// Search Inputs listeners
+searchInput.addEventListener('input', () => {
+  const val = searchInput.value;
+  if (val.startsWith('>')) {
+    searchWrapper.classList.remove('slash-active');
+    searchWrapper.classList.add('command-active');
+    showSuggestions(val);
+  } else if (val.startsWith('/')) {
+    searchWrapper.classList.remove('command-active');
+    searchWrapper.classList.add('slash-active');
+    
+    // Hide suggestions if they already typed space after command (they are writing query now)
+    if (val.includes(' ')) {
+      hideSuggestions();
+    } else {
+      showSuggestions(val);
+    }
+  } else {
+    searchWrapper.classList.remove('command-active', 'slash-active');
+    hideSuggestions();
+  }
+});
+
+searchInput.addEventListener('keydown', (e) => {
+  const hasSuggestions = !suggestionsBox.classList.contains('hidden') && filteredItems.length > 0;
+
+  if (hasSuggestions) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeSuggestionIdx = (activeSuggestionIdx + 1) % filteredItems.length;
+      updateSuggestionHighlight();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeSuggestionIdx = (activeSuggestionIdx - 1 + filteredItems.length) % filteredItems.length;
+      updateSuggestionHighlight();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeSuggestionIdx >= 0) {
+        executeItem(filteredItems[activeSuggestionIdx]);
+      } else {
+        const queryWord = searchInput.value.trim().toLowerCase();
+        const exactMatch = filteredItems.find(c => c.cmd === queryWord);
+        if (exactMatch) {
+          executeItem(exactMatch);
+        }
+      }
+    } else if (e.key === 'Escape') {
+      hideSuggestions();
+    }
+  }
+});
+
+// Search Redirect (Same Tab)
 searchForm.addEventListener('submit', (e) => {
   const q = searchInput.value.trim();
   if (!q) {
     e.preventDefault();
     return;
   }
+
+  // Parse command directly
+  if (q.startsWith('>')) {
+    e.preventDefault();
+    const match = UTILITY_COMMANDS.find(c => c.cmd === q.toLowerCase());
+    if (match) {
+      executeItem(match);
+    }
+    return;
+  }
+
+  // Parse slash search operators
+  if (q.startsWith('/')) {
+    e.preventDefault();
+    const parts = q.split(' ');
+    const command = parts[0].toLowerCase();
+    const query = parts.slice(1).join(' ');
+
+    const engine = SEARCH_ENGINES.find(se => se.cmd === command);
+    if (engine) {
+      if (query) {
+        window.location.href = engine.url.replace('{q}', encodeURIComponent(query));
+      } else {
+        // If empty query, just redirect to placeholder/command fill state
+        searchInput.value = engine.placeholder;
+        searchInput.focus();
+      }
+    }
+    return;
+  }
+
+  // Standard URL check
   if (q.includes('.') && !q.includes(' ')) {
     e.preventDefault();
-    window.open(`https://${q}`, '_blank');
+    window.location.href = q.startsWith('http') ? q : `https://${q}`;
   }
 });
+
+// Focus Retargeting Hack
+function forceFocus() {
+  searchInput.focus();
+}
 
 // Initialization
 datepicker.max = formatDate(TODAY);
@@ -238,7 +459,7 @@ datepicker.min = formatDate(APOD_START);
 goToday();
 
 // UI Event Listeners
-btnCalendar.addEventListener('click', () => datepicker.showPicker?.() ?? datepicker.click());
+dateWidgetBtn.addEventListener('click', () => datepicker.showPicker?.() ?? datepicker.click());
 
 datepicker.addEventListener('change', () => {
   if (datepicker.value) fetchAPOD(datepicker.value);
@@ -256,8 +477,18 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 't' || e.key === 'T') goToday();
 });
 
-// Initial focus
+// Close suggestions on outside click
+document.addEventListener('click', (e) => {
+  if (!searchForm.contains(e.target)) {
+    hideSuggestions();
+  }
+});
+
+// Initial delayed focus retargeting sequence
 window.addEventListener('load', () => {
   apodView.classList.remove('hidden');
-  searchInput.focus();
+  forceFocus();
+  setTimeout(forceFocus, 500);
+  setTimeout(forceFocus, 1000);
+  setTimeout(forceFocus, 2000);
 });
