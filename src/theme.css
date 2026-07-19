@@ -27,6 +27,21 @@
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-hover: rgba(255, 255, 255, 0.12);
 
+  /* Semantic surfaces — panels, inputs, scrims (theme-aware) */
+  --panel-bg: rgba(16, 16, 38, 0.92);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --panel-text: #FFFFFF;
+  --panel-text-muted: rgba(255, 255, 255, 0.6);
+  --panel-hover: rgba(255, 255, 255, 0.08);
+  --panel-shadow: rgba(0, 0, 0, 0.5);
+
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-text: #FFFFFF;
+
+  --scrim: rgba(0, 0, 0, 0.75);
+  --starfield-opacity: 1;
+
   --font-heading: 'Rajdhani', sans-serif;
   --font-body: 'Outfit', sans-serif;
 
@@ -34,6 +49,8 @@
   --radius-md: 12px;
   --radius-lg: 20px;
   --max-width: 100vw;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Void Theme: True Deep Black */
@@ -49,4 +66,54 @@
 
   --border-subtle: rgba(255, 255, 255, 0.04);
   --border-hover: rgba(255, 255, 255, 0.08);
+
+  --panel-bg: rgba(0, 0, 0, 0.95);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-text: #FFFFFF;
+  --panel-text-muted: rgba(255, 255, 255, 0.55);
+  --panel-hover: rgba(255, 255, 255, 0.06);
+  --panel-shadow: rgba(0, 0, 0, 0.7);
+
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --input-border: rgba(255, 255, 255, 0.08);
+  --input-text: #FFFFFF;
+
+  --scrim: rgba(0, 0, 0, 0.85);
+  --starfield-opacity: 0.15;
+}
+
+/* Nova Theme: Bright Daylight */
+[data-theme="light"] {
+  --bg-primary: #EEF1F6;
+  --bg-surface: #FFFFFF;
+  --bg-raised: #F4F6FB;
+  --bg-overlay: rgba(255, 255, 255, 0.85);
+
+  --japonica: #C4593B;
+  --peach: #C15F3C;
+  --crail: #A84B2C;
+  /* Deepened accent so lime reads on white without glare */
+  --green-500: #4B9E00;
+  --green-glow: rgba(75, 158, 0, 0.22);
+
+  --text-primary: #1A1F2B;
+  --text-secondary: #4A5262;
+  --text-muted: #8A93A3;
+
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(15, 23, 42, 0.16);
+
+  --panel-bg: rgba(255, 255, 255, 0.94);
+  --panel-border: rgba(15, 23, 42, 0.1);
+  --panel-text: #1A1F2B;
+  --panel-text-muted: rgba(26, 31, 43, 0.55);
+  --panel-hover: rgba(15, 23, 42, 0.05);
+  --panel-shadow: rgba(15, 23, 42, 0.18);
+
+  --input-bg: rgba(15, 23, 42, 0.04);
+  --input-border: rgba(15, 23, 42, 0.12);
+  --input-text: #1A1F2B;
+
+  --scrim: rgba(15, 23, 42, 0.35);
+  --starfield-opacity: 0;
 }

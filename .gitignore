@@ -26,6 +26,3 @@ dist-ssr
 
 .env
 .env.local
-
-non.md
-devlogs/
