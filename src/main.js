@@ -1,4 +1,4 @@
-const API_KEY = import.meta.env.VITE_NASA_API_KEY;
+const API_KEY = import.meta.env.VITE_NASA_API_KEY || 'DEMO_KEY';
 const API_BASE = 'https://api.nasa.gov/planetary/apod';
 
 const APOD_START = new Date('1995-06-16');
@@ -756,28 +756,36 @@ function updateUI(data) {
   apodExplanation.textContent = data.explanation;
   updateDateUI(data.date);
 
+  const secureUrl = data.url.replace('http://', 'https://');
+
   if (data.media_type === 'video') {
     apodImage.classList.add('hidden');
     apodVideo.classList.remove('hidden');
-    apodVideo.src = data.url;
+    apodVideo.src = secureUrl;
   } else {
     apodVideo.classList.add('hidden');
     apodImage.classList.remove('hidden');
-    loadImageWithCache(data.url, data.title);
+    loadImageWithCache(secureUrl, data.title);
   }
   
   setTimeout(forceFocus, 100);
 }
 
 // fetch logic
-async function fetchAPOD(dateStr) {
+async function fetchAPOD(dateStr, attempt = 0) {
   showLoading();
 
   try {
     const res = await fetch(`${API_BASE}?api_key=${API_KEY}&date=${dateStr}`);
     if (!res.ok) {
+      if ((res.status === 400 || res.status === 404) && attempt < 3) {
+        const d = toDateObj(dateStr);
+        d.setDate(d.getDate() - 1);
+        goToDate(formatDate(d), attempt + 1);
+        return;
+      }
       if (res.status === 429) throw new Error('API rate limit reached. Try again shortly.');
-      if (res.status === 400) throw new Error('No APOD available for this date.');
+      if (res.status === 400 || res.status === 404) throw new Error('No APOD available for this date.');
       throw new Error(`Request failed (${res.status})`);
     }
     const data = await res.json();
@@ -788,9 +796,9 @@ async function fetchAPOD(dateStr) {
 }
 
 // nav triggers
-function goToDate(dateStr) {
+function goToDate(dateStr, attempt = 0) {
   datepicker.value = dateStr;
-  fetchAPOD(dateStr);
+  fetchAPOD(dateStr, attempt);
 }
 
 function goToday() {
