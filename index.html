@@ -17,34 +17,28 @@
           <h1 class="logo">Astro<span class="logo-accent">Pinax</span></h1>
         </div>
         <div class="topbar-right">
-          <!-- Audio Toggle Button -->
           <button class="btn-icon" id="btn-audio" title="Toggle space ambient sound">
-            <!-- Audio Off icon -->
             <svg class="icon-audio-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v6a3 3 0 0 0 5.12 2.12M15 9.34V4a1 1 0 0 0-1.6-.8l-4 3.2M2 13h4l5 4V7L9.5 9"/></svg>
-            <!-- Audio On icon -->
             <svg class="icon-audio-on hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
           </button>
-          
-          <!-- Theme Button (cycles Space → Void → Nova) -->
+
+          <!-- Theme: cycles Space → Void → Nova -->
           <button class="btn-icon" id="btn-theme" title="Toggle theme">
             <svg class="icon-space" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M18.36 5.64l-12.72 12.72M5.64 5.64l12.72 12.72"/></svg>
             <svg class="icon-void" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             <svg class="icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           </button>
 
-          <!-- Settings Button -->
           <button class="btn-icon" id="btn-settings" title="AstroPinax Settings">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
           
-          <!-- Unified Glowing Date Widget -->
           <div class="date-widget-container">
             <button class="date-widget" id="date-widget-btn" title="Pick a date">
               <svg class="calendar-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <span class="date-display" id="date-display"></span>
             </button>
             
-            <!-- Custom Cupertino Calendar Grid Dropdown -->
             <div class="calendar-dropdown hidden" id="calendar-dropdown"></div>
             <input type="date" id="datepicker" style="display:none;" />
           </div>
@@ -54,30 +48,28 @@
       <main id="content">
         <section class="apod-section" id="apod-section">
           <div id="apod-view" class="apod-view loading">
-            <!-- Background Layer -->
             <div class="apod-media" id="apod-media-container">
               <img id="apod-image" src="" alt="" />
               <iframe id="apod-video" class="hidden" src="" allowfullscreen></iframe>
             </div>
 
-            <!-- Dark overlay for legibility -->
             <div class="dark-overlay"></div>
 
-            <!-- Foreground Layer (Search + Text) -->
             <div class="foreground-ui">
+
               <section class="search-section">
                 <form id="search-form" action="https://www.google.com/search" method="GET" target="_self">
                   <div class="search-wrapper" id="search-wrapper">
                     <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input type="text" name="q" id="search-input" placeholder="Search the cosmos or type a URL…" autocomplete="off" spellcheck="false" autofocus />
                   </div>
-                  <!-- Command suggestions dropdown -->
                   <div id="suggestions-box" class="suggestions-box hidden"></div>
                 </form>
                 
-                <!-- Quick Access Widget Links -->
                 <div class="quick-access-container" id="quick-access-box"></div>
+
               </section>
+
 
               <div class="apod-info" id="apod-info-container">
                 <div class="apod-meta">
@@ -97,7 +89,6 @@
       <footer class="footer">
         <span class="footer-sig">Sudotads</span>
         
-        <!-- Live Audio Wave Equalizer Icon -->
         <div class="audio-equalizer hidden" id="audio-equalizer">
           <span></span>
           <span></span>
@@ -108,7 +99,6 @@
       </footer>
     </div>
 
-    <!-- Native Glassmorphic Settings Dialog -->
     <dialog id="settings-dialog" class="settings-dialog">
       <div class="dialog-content">
         <header class="dialog-header">
@@ -181,7 +171,7 @@
             </div>
           </section>
 
-          <!-- Quick Access Links -->
+          <!-- Quick Access -->
           <section class="setting-group">
             <div class="setting-group-head">
               <h3 class="setting-group-title">Quick Access Links</h3>
@@ -194,7 +184,7 @@
             <p class="shortcuts-empty hidden" id="shortcuts-empty">No links yet — add one to pin it below the search bar.</p>
           </section>
 
-          <!-- Set as default new tab -->
+          <!-- Default new tab -->
           <section class="setting-group">
             <h3 class="setting-group-title">Set as Default New Tab</h3>
             <p class="setting-hint setting-hint-block">

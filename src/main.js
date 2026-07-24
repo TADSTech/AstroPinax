@@ -6,7 +6,6 @@ const TODAY = new Date();
 
 const $ = (sel) => document.querySelector(sel);
 
-// dom elements
 const datepicker = $('#datepicker');
 const dateWidgetBtn = $('#date-widget-btn');
 const calendarDropdown = $('#calendar-dropdown');
@@ -49,7 +48,6 @@ const starfield = $('#starfield');
 
 const DEFAULT_SHORTCUTS = "GitHub,https://github.com\nReddit,https://reddit.com\nYouTube,https://youtube.com\nNASA,https://apod.nasa.gov";
 
-// local storage prefs
 let prefs = {
   theme: localStorage.getItem('astropinax-pref-theme') || 'space',
   engine: localStorage.getItem('astropinax-pref-engine') || 'google',
@@ -65,7 +63,6 @@ const THEME_LABELS = { space: 'Space', void: 'Void', light: 'Nova (Light)' };
 function applyPreferences() {
   document.documentElement.setAttribute('data-theme', prefs.theme);
   if (starfield) {
-    // Opacity is driven by the theme's --starfield-opacity token.
     const themeOpacity = getComputedStyle(document.documentElement)
       .getPropertyValue('--starfield-opacity').trim();
     starfield.style.opacity = themeOpacity || '1';
@@ -85,6 +82,7 @@ function applyPreferences() {
   }
 
   renderShortcuts();
+
 }
 
 function renderShortcuts() {
@@ -108,8 +106,7 @@ function renderShortcuts() {
       img.style.width = '20px';
       img.style.height = '20px';
       img.style.pointerEvents = 'none';
-      // Show initials if the favicon service returns nothing.
-      img.addEventListener('error', () => {
+        img.addEventListener('error', () => {
         img.remove();
         a.textContent = fallback;
       });
@@ -123,7 +120,6 @@ function renderShortcuts() {
   });
 }
 
-// theme toggle — cycles Space -> Void -> Nova (Light) and persists
 function toggleTheme() {
   const idx = THEME_ORDER.indexOf(prefs.theme);
   prefs.theme = THEME_ORDER[(idx + 1) % THEME_ORDER.length];
@@ -133,7 +129,6 @@ function toggleTheme() {
 
 btnTheme.addEventListener('click', toggleTheme);
 
-// header audio toggle
 btnAudio.addEventListener('click', () => {
   if (isPlayingAudio) {
     stopAmbientAudio();
@@ -142,7 +137,6 @@ btnAudio.addEventListener('click', () => {
   }
 });
 
-// shortcuts editor — visual rows backed by the "Name,URL\n" storage format
 function parseShortcuts(raw) {
   return raw.split('\n')
     .map(line => {
@@ -196,8 +190,7 @@ function createShortcutRow(name = '', url = '') {
       img.alt = '';
       img.width = 18;
       img.height = 18;
-      // Fall back to the initial letter if the favicon can't be fetched.
-      img.addEventListener('error', () => {
+        img.addEventListener('error', () => {
         fav.innerHTML = '';
         fav.textContent = letter;
       });
@@ -220,7 +213,6 @@ function createShortcutRow(name = '', url = '') {
   urlInput.placeholder = 'https://example.com';
   urlInput.value = url;
   urlInput.addEventListener('input', () => setFav(urlInput.value));
-  // Keep the letter fallback in sync when there's no valid favicon yet.
   nameInput.addEventListener('input', () => setFav(urlInput.value));
 
   setFav(url);
@@ -253,12 +245,10 @@ btnAddShortcut.addEventListener('click', () => {
   row.querySelector('.shortcut-name').focus();
 });
 
-// live volume readout
 settingVolume.addEventListener('input', () => {
   volumeReadout.textContent = `${settingVolume.value}%`;
 });
 
-// copy default-tab URL
 btnCopyUrl.addEventListener('click', async () => {
   const url = defaultUrlField.value;
   try {
@@ -275,7 +265,6 @@ btnCopyUrl.addEventListener('click', async () => {
   }, 1600);
 });
 
-// dialog events
 btnSettings.addEventListener('click', () => {
   settingTheme.value = prefs.theme;
   settingEngine.value = prefs.engine;
@@ -294,7 +283,6 @@ function closeSettings() {
 btnCloseSettings.addEventListener('click', closeSettings);
 btnCancelSettings.addEventListener('click', closeSettings);
 
-// click on backdrop closes the dialog
 settingsDialog.addEventListener('click', (e) => {
   if (e.target === settingsDialog) closeSettings();
 });
@@ -325,7 +313,6 @@ btnSaveSettings.addEventListener('click', () => {
   settingsDialog.close();
 });
 
-// audio synth (web audio)
 let audioCtx = null;
 let mainGain = null;
 let delayNode = null;
@@ -378,6 +365,7 @@ function startAmbientAudio() {
 
   isPlayingAudio = true;
   updateAudioUI();
+
 }
 
 function stopTrackSynths() {
@@ -391,6 +379,7 @@ function stopTrackSynths() {
     try { node.disconnect(); } catch(e) {}
   });
   trackNodes = [];
+
 }
 
 function playTrack1() {
@@ -466,6 +455,7 @@ function playTrack2() {
     noteOsc.start();
     noteOsc.stop(audioCtx.currentTime + 4.0);
   }, 4000);
+
 }
 
 function playTrack3() {
@@ -533,7 +523,6 @@ function updateAudioUI() {
   }
 }
 
-// custom calendar
 let currentCalYear = TODAY.getFullYear();
 let currentCalMonth = TODAY.getMonth();
 
@@ -643,7 +632,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// date utils
+
 function formatDate(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -674,7 +663,6 @@ function formatShort(d) {
   });
 }
 
-// UI state loaders
 function showLoading() {
   apodView.classList.remove('hidden');
   apodView.classList.add('loading');
@@ -771,7 +759,6 @@ function updateUI(data) {
   setTimeout(forceFocus, 100);
 }
 
-// fetch logic
 async function fetchAPOD(dateStr, attempt = 0) {
   showLoading();
 
@@ -795,7 +782,6 @@ async function fetchAPOD(dateStr, attempt = 0) {
   }
 }
 
-// nav triggers
 function goToDate(dateStr, attempt = 0) {
   datepicker.value = dateStr;
   fetchAPOD(dateStr, attempt);
@@ -819,7 +805,6 @@ function shiftDay(delta) {
   goToDate(formatDate(clampDate(current)));
 }
 
-// help console guide overlay
 function showHelpGuide() {
   apodTitle.textContent = "AstroPinax Terminal System Guide";
   apodDateLabel.textContent = "COMMAND DIRECTORY";
@@ -859,7 +844,6 @@ function showHelpGuide() {
   });
 }
 
-// commands and search engines
 const UTILITY_COMMANDS = [
   { cmd: '>today', desc: 'Jump to today\'s astronomy picture', action: () => goToday() },
   { cmd: '>random', desc: 'Explore a random date from the archives', action: () => goRandom() },
@@ -949,7 +933,8 @@ function executeItem(itemObj) {
   }
 }
 
-// input event hooks
+
+
 searchInput.addEventListener('input', () => {
   const val = searchInput.value;
   if (val.startsWith('>')) {
